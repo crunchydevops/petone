@@ -151,7 +151,7 @@ dmypy.json
 
 # latext
 *.gz
-
+*.aux
 
 # vi
 *.swp
