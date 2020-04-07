@@ -9,7 +9,7 @@ LABEL architecture="$ARCH" \
       summary="This image has a running glusterfs service" \
       io.k8s.display-name="Gluster server on ubuntu" \
       io.k8s.description="Gluster Image is based on Ubuntu Image which is a scalable network filesystem." \
-      description="Gluster Image is based on ubuntu Image which is a scalable network filesystem. " \
+      description="Gluster Image is based on ubuntu Image which is a scalable network filesystem. " 
 
 RUN apt-get update -y && \
     apt-get install software-properties-common -y && \
