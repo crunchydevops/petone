@@ -27,4 +27,5 @@ RUN rm -rf /lib/systemd/system/multi-user.target.wants/ \
     && rm -f /lib/systemd/system/anaconda.target.wants/*
 
 VOLUME ["/sys/fs/cgroup"]
-CMD ["/usr/sbin/glusterd"]
+#CMD ["/usr/sbin/glusterd"]
+CMD ["/bin/bash"]
