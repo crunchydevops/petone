@@ -17,7 +17,7 @@ Change /etc/hosts on TEST2
  51.68.5.207 gusterfs-client
 ```
 ## Installation 
-Note: Use locahost IP on each hostname to avoid NAT redirecting   
+Note: Use locahost IP on the host you are connected rathe its ip public address to avoid NAT redirecting   
 On both glusterfs1 and glusterfs2 , type that: 
 ```shell script
 apt-get install software-properties-common -y
@@ -48,12 +48,12 @@ next, create a storage directory for glusterfs and mount the partition
    mkdir /glusterfs
    mount /dev/vdc1 /glusterfs
 ```
-Create a persistent mount point by edting /etc/fstab 
+Create a persistent mount point by editing /etc/fstab and a this line
 ```
    /dev/vdc1 /glusterfs ext4 defaults 0  0 
  ```
 
-## Configuration GLusterfs Storage Pool
+## Configuration Glusterfs Storage Pool
 
 create a trusted storage pool on glusterfs1 
 ```shell script
