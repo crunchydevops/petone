@@ -1,6 +1,6 @@
 #  Glusterfs
-#  Get the latest tag --  git describe --tags `git rev-list --tags --max-count=1` | sort -V
-#
+#  Get the latest tag:   git describe --tags `git rev-list --tags --max-count=1` | sort -V
+#  Remove remote file in:  .gitignore git rm --cached `git ls-files -i -X .gitignore`
 FROM fedora:rawhide
 
 RUN dnf-y update && \

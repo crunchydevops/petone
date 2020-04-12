@@ -1,0 +1,50 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: apt update cache
+      apt: update_cache=yes
+    - name: apt upgrade
+      apt: name='*' state=latest
+    - name: apt install all packages
+      apt:
+        pkg:
+          - make
+          - automake
+          - autoconf
+          - libtool
+          - flex
+          - bison
+          - pkg-config
+          - libssl-dev
+          - libxml2-dev
+          - python-dev
+          - libaio-dev
+          - libibverbs-dev
+          - librdmacm-dev
+          - libreadline-dev
+          - liblvm2-dev
+          - libglib2.0-dev
+          - liburcu-dev
+          - libcmocka-dev
+          - libsqlite3-dev
+          - libacl1-dev
+          - uuid-dev
+    - name: get glusterfs tar file
+      get_url:
+          url: https://download.gluster.org/pub/gluster/glusterfs/LATEST/glusterfs-7.4.tar.gz
+          dest: /home/{{ ansible_ssh_user }}
+          checksum: sha256:8b3b11a733edfb5a5045388add8311efa950d59f37f5771bf01b7dd8b4885973
+    - name:
+      unarchive:
+        src: /home/{{ ansible_ssh_user }}/glusterfs-7.4.tar.gz
+        dest: /home/{{ ansible_ssh_user }}
+        remote_src: yes
+    - name: run autogen.sh
+      shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./autogen.sh
+    - name: run configure
+      shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./configure
+    - name: run make
+      shell:  cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && make
+    - name: run make install
+      shell:  cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && make install
