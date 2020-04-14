@@ -43,8 +43,28 @@
     - name: run autogen.sh
       shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./autogen.sh
     - name: run configure
-      shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./configure
+      shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./configure --with-ipv6-default
     - name: run make
       shell:  cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && make
     - name: run make install
       shell:  cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && make install
+    - name: create system directory
+      file:
+        path: /usr/lib/systemd/system/
+        state: directory
+        mode: '0755'
+    - name: copy glusterd.service file
+      copy:
+        src: /home/{{ ansible_ssh_user }}/glusterfs-7.4/extras/systemd/glusterd.service
+        dest: /usr/lib/systemd/system/
+        remote_src: yes
+    - name: Set LD_LIBRARY_PATH
+      lineinfile:
+        path: /usr/lib/systemd/system/glusterd.service
+        regexp: '^Environment='
+        insertafter: '^Environment='
+        line: Environment="LD_LIBRARY_PATH=/usr/local/lib"
+    - name: Start glusterfs service
+      systemd:
+        state: started
+        name: glusterd
