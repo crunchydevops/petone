@@ -1,6 +1,8 @@
 ---
 - hosts: all
   become: true
+  roles:
+    - role.ntp
   tasks:
     - name:  update cache
       yum: update_cache=yes
@@ -87,7 +89,15 @@
         number: 1
         state: present
         part_end: 2GiB
+    - name: get public ip
+      ipify_facts:
+      register: public_ip
     - name: Update /etc/hosts
       template:
         src: ip_hostname.j2
         dest: /home/{{ ansible_ssh_user }}/temp_hostname
+    - name: Remplace public ip by localhost to avoid NAT issue for glusterfs
+      replace:
+        path: /home/{{ ansible_ssh_user }}/temp_hostname
+        regexp: '^{{ public_ip.ansible_facts.ipify_public_ip }}'
+        replace: '127.0.0.1'
