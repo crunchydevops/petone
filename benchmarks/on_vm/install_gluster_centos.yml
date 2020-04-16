@@ -89,6 +89,10 @@
         number: 1
         state: present
         part_end: 2GiB
+    - name: format the device
+      filesystem:
+        fstype: xfs
+        dev: /dev/vdc1
     - name: get public ip
       ipify_facts:
       register: public_ip
@@ -101,3 +105,21 @@
         path: /home/{{ ansible_ssh_user }}/temp_hostname
         regexp: '^{{ public_ip.ansible_facts.ipify_public_ip }}'
         replace: '127.0.0.1'
+    - name: Check if ansible comment is set on
+      shell: "grep Ansible /etc/hosts"
+      register: check_ip_on
+      ignore_errors: yes
+    - name: get value using slurp
+      slurp:
+        src: "/home/{{ ansible_ssh_user }}/temp_hostname"
+      register: values
+    - name: insert values in /etc/motd
+      blockinfile:
+        block: "{{ values['content'] | b64decode }}"
+        path: /etc/hosts
+        backup: yes
+      when: check_ip_on.rc == 1
+- hosts: leader
+  become: true
+  tasks:
+    - name:
