@@ -109,6 +109,25 @@
       shell: "grep Ansible /etc/hosts"
       register: check_ip_on
       ignore_errors: yes
+    - name: create working directory
+      file:
+        path: /data/brick1
+        state: directory
+        mode: '0755'
+    - name: change fstab
+      lineinfile:
+        path: /etc/fstab
+        state: present
+        regexp: '^/dev/vdc1'
+        line: '/dev/vdc1 /data/brick1 xfs defaults 1 2'
+        backup: yes
+    - name: mount glusterfs disk
+      command: mount -a && mount
+    - name: create working directory
+      file:
+        path: /data/brick1/gv0
+        state: directory
+        mode: '0755'
     - name: get value using slurp
       slurp:
         src: "/home/{{ ansible_ssh_user }}/temp_hostname"
@@ -119,7 +138,17 @@
         path: /etc/hosts
         backup: yes
       when: check_ip_on.rc == 1
+    - name: create gluster volume
+      template:
+        src: set_gluster_volume.j2
+        dest: /home/{{ ansible_ssh_user }}/volume.txt
+      tags:
+        - volume
 - hosts: leader
   become: true
   tasks:
-    - name:
+    - name: show all slave host
+      debug:
+        msg:  "{{ item }}"
+      with_inventory_hostnames:
+        - slave
