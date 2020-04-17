@@ -1,4 +1,6 @@
 ---
+# resolved : https://bugzilla.redhat.com/show_bug.cgi?id=1539142
+#
 - hosts: all
   become: true
   roles:
@@ -29,7 +31,6 @@
           - libcurl-devel
           - libibverbs-devel
           - librdmacm-devel
-          - libtirpc-devel
           - libtool
           - libxml2-devel
           - lvm2-devel
@@ -64,7 +65,7 @@
     - name: run autogen.sh
       shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./autogen.sh
     - name: run configure
-      shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./configure --with-ipv6-default
+      shell: cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && ./configure
     - name: run make
       shell:  cd /home/{{ ansible_ssh_user }}/glusterfs-7.4 && make
     - name: run make install
@@ -138,17 +139,29 @@
         path: /etc/hosts
         backup: yes
       when: check_ip_on.rc == 1
-    - name: create gluster volume
-      template:
-        src: set_gluster_volume.j2
-        dest: /home/{{ ansible_ssh_user }}/volume.txt
-      tags:
-        - volume
 - hosts: leader
   become: true
   tasks:
-    - name: show all slave host
-      debug:
-        msg:  "{{ item }}"
-      with_inventory_hostnames:
-        - slave
+    - name: create gluster volume
+      template:
+        src: set_gluster_volume.j2
+        dest: /home/{{ ansible_ssh_user }}/volume.sh
+        mode: '0755'
+      tags:
+        - volume
+    - name: create command peer probe all slaves
+      template:
+        src: set_gluster_peer_slave.j2
+        dest: /home/{{ ansible_ssh_user }}/peer.sh
+        mode: '0755'
+      tags:
+        - peer
+    - name: Create glusterfs volume
+      shell: /home/{{ ansible_ssh_user }}/peer.sh
+      tags:
+        - setpeer
+    - name: Create glusterfs volume
+      shell: /home/{{ ansible_ssh_user }}/volume.sh
+      tags:
+        - setvol
+

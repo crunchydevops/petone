@@ -1,8 +1,10 @@
-{% set volume = ' gluster volume gv0 replica ' %}
-{% set vol2 = volume ~  play_hosts | length ~ " " %}
+{% set sheban = '#!/usr/bin/sh' %}
+{% set volume = ' /usr/local/sbin/gluster volume create gv0 replica ' %}
+{% set vol2 = volume ~  groups['all'] | length ~ " " %}
 {% set arr1 = [] %}
-{% for host in play_hosts -%}
+{% for host in groups['all'] -%}
 {% set vol = host ~ ":" ~ '/data/brick1/gv0 ' %}
 {{ arr1.append(vol) }}
 {%- endfor %}
-{{ vol2}} {{arr1|join(" ") }}
+{{ sheban }}
+{{ vol2}} {{arr1|join(" ") }} force
