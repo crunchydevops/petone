@@ -1,8 +1,8 @@
 {% set volume = ' gluster volume gv0 replica ' %}
 {% set vol2 = volume ~  play_hosts | length ~ " " %}
 {% set arr1 = [] %}
-{% for host in play_hosts %}
+{% for host in play_hosts -%}
 {% set vol = host ~ ":" ~ '/data/brick1/gv0 ' %}
 {{ arr1.append(vol) }}
-{% endfor %}
+{%- endfor %}
 {{ vol2}} {{arr1|join(" ") }}
