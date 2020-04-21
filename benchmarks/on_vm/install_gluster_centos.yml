@@ -17,6 +17,7 @@
         name: "{{ packages }}"
       vars:
         packages:
+          - git
           - autoconf
           - automake
           - bison
@@ -89,10 +90,10 @@
         device: /dev/vdc
         number: 1
         state: present
-        part_end: 2GiB
+        part_end: 4GiB
     - name: format the device
       filesystem:
-        fstype: xfs
+        fstype: ext4
         dev: /dev/vdc1
     - name: get public ip
       ipify_facts:
@@ -120,7 +121,7 @@
         path: /etc/fstab
         state: present
         regexp: '^/dev/vdc1'
-        line: '/dev/vdc1 /data/brick1 xfs defaults 1 2'
+        line: '/dev/vdc1 /data/brick1 ext4 defaults 1 2'
         backup: yes
     - name: mount glusterfs disk
       command: mount -a && mount
@@ -141,22 +142,25 @@
       when: check_ip_on.rc == 1
 - hosts: leader
   become: true
+  roles:
+    - role: role.docker
+      tags: docker
   tasks:
-    - name: create gluster volume
+    - name: Build command for gluster volume
       template:
         src: set_gluster_volume.j2
         dest: /home/{{ ansible_ssh_user }}/volume.sh
         mode: '0755'
       tags:
         - volume
-    - name: create command peer probe all slaves
+    - name: Build command for peer probe on all slaves
       template:
         src: set_gluster_peer_slave.j2
         dest: /home/{{ ansible_ssh_user }}/peer.sh
         mode: '0755'
       tags:
         - peer
-    - name: Create glusterfs volume
+    - name: Create peer probe
       shell: /home/{{ ansible_ssh_user }}/peer.sh
       tags:
         - setpeer
@@ -164,4 +168,7 @@
       shell: /home/{{ ansible_ssh_user }}/volume.sh
       tags:
         - setvol
-
+    - name: Start glusterfs volume
+      shell: /usr/local/sbin/gluster volume start gv0
+      tags:
+        - startvol
