@@ -28,10 +28,20 @@ Mount a directory as a glusterfs type
 ```shell script
    sudo mount -t glusterfs leader1:/gv0 /mnt
 ```
-Download postgresql container 
+Download postgresql repository and build the image 
 ```shell script
   git clone https://github.com/system-dev-formations/docker-postgres11.4.git
   cd docker-postgres11.4
-  docker build -t postgres114
-  docker run -d -it --rm -v  /mnt:/var/lib/postgresql/data -e POSTGRES_PASSWORD=password postgres114
+  docker build -t postgres114 .
 ```
+Add a group and postgres user on the leader
+```shell script
+  sudo groupadd -g 70 postgres
+  
+```
+```shell script
+  docker run -d -it --name db  -p 15432:5432 --rm -v /tmp:/tmp -v /mnt:/var/lib/postgresql/data -e POSTGRES_PASSWORD=password postgres114
+```
+
+
+

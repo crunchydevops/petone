@@ -1,0 +1,81 @@
+---
+# resolved : https://bugzilla.redhat.com/show_bug.cgi?id=1539142
+#
+- hosts: all
+  become: true
+  roles:
+    - role.ntp
+  tasks:
+    - name:  update cache
+      yum: update_cache=yes
+    - name:  add epel release
+      yum:
+        name: epel-release
+        state: latest
+    - name: Generate temp_hostname
+      template:
+        src: ip_hostname.j2
+        dest: /home/{{ ansible_ssh_user }}/temp_hostname
+    - name: Check if ansible comment is set on
+      shell: "grep Ansible /etc/hosts"
+      register: check_ip_on
+      ignore_errors: yes
+    - name: get value using slurp
+      slurp:
+        src: "/home/{{ ansible_ssh_user }}/temp_hostname"
+      register: values
+    - name: insert values in /etc/hosts
+      blockinfile:
+        block: "{{ values['content'] | b64decode }}"
+        path: /etc/hosts
+        backup: yes
+      when: check_ip_on.rc == 1
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+    - name: add user cephadm
+      user:
+        name: cephadm
+        shell: /bin/bash
+        password: "{{ '12345678' | password_hash('sha512') }}"
+        groups: wheel
+        append: yes
+    - name: add user ceph
+      user:
+        name: ceph
+        shell: /bin/bash
+        password: "{{ '12345678' | password_hash('sha512') }}"
+        groups: wheel
+        append: yes
+      tags:
+        - ceph
+    - name: Create a directory for ssh
+      become_user: ceph
+      file:
+        path: /home/ceph/.ssh
+        state: directory
+        mode: '0700'
+      tags:
+        - dir
+- hosts: admin
+  become: true
+  tasks:
+    - name: create ssh key on admin user ceph
+      become_user: ceph
+      openssh_keypair:
+        path: /home/ceph/.ssh/id_rsa
+      tags:
+        - key
+    - name: get public-key
+      shell: cat /home/ceph/.ssh/id_rsa.pub
+      register: ssh_keys
+      tags:
+        - getkey
+    - name: Deploy ceph ssh key to all slaves
+      lineinfile:
+        dest: /home/ceph/.ssh/authorized_keys
+        state: present
+        line: " {{ hostvars[item]['ssh_keys']['stdout']}}"
+      with_items: "{{ groups['ceph']}}"
+      tags:
+        - deploy
