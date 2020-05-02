@@ -85,7 +85,7 @@
         device: /dev/vdc
         number: 1
         state: present
-        part_end: 4GiB
+        part_end: 18GiB
     - name: format the device
       filesystem:
         fstype: ext4
@@ -161,6 +161,7 @@
         - setpeer
     - name: Create glusterfs volume
       shell: /home/{{ ansible_ssh_user }}/volume.sh
+      ignore_errors: yes
       tags:
         - setvol
     - name: Start glusterfs volume

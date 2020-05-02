@@ -1,0 +1,7 @@
+- hosts: all
+  become: true
+  roles:
+    - role: role.ntp
+      tags: ntp
+    - role: role.docker
+      tags: docker
