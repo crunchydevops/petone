@@ -168,3 +168,5 @@
       shell: /usr/local/sbin/gluster volume start gv0
       tags:
         - startvol
+    - name: Set switch over delay
+      shell:  /usr/local/sbin/gluster volume set gv0 network.ping-timeout 5
