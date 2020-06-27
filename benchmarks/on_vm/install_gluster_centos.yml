@@ -5,6 +5,7 @@
   become: true
   roles:
     - role.ntp
+    - role.docker
   tasks:
     - name:  update cache
       yum: update_cache=yes
@@ -137,9 +138,6 @@
       when: check_ip_on.rc == 1
 - hosts: leader
   become: true
-  roles:
-    - role: role.docker
-      tags: docker
   tasks:
     - name: Build command for gluster volume
       template:
