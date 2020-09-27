@@ -58,7 +58,7 @@
       git:
         repo: 'https://github.com/gluster/glusterfs.git'
         dest: /home/{{ ansible_ssh_user }}/glusterfs
-        version: v7.5
+        version: v8.0
     - name: run autogen.sh
       shell: cd /home/{{ ansible_ssh_user }}/glusterfs && ./autogen.sh
     - name: run configure
@@ -86,7 +86,7 @@
         device: /dev/vdc
         number: 1
         state: present
-        part_end: 18GiB
+        part_end: 3GiB
     - name: format the device
       filesystem:
         fstype: ext4
